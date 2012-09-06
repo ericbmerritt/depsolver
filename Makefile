@@ -17,7 +17,7 @@
 
 ERL = $(shell which erl)
 
-ERLFLAGS= -pa $(CURDIR)/.eunit -pa $(CURDIR)/ebin -pa $(CURDIR)/*/ebin
+ERLFLAGS= -pa $(CURDIR)/.eunit -pa $(CURDIR)/ebin -pa $(CURDIR)/deps/*/ebin
 
 REBAR=$(shell which rebar)
 
@@ -36,9 +36,13 @@ else
 DEPSOLVER_PLT=$(GLOBAL_PLT)
 endif
 
-.PHONY: all compile doc clean eunit dialyzer typer shell distclean
+.PHONY: all compile doc clean eunit dialyzer typer shell distclean get-deps
 
 all: compile eunit dialyzer
+
+get-deps:
+	$(REBAR) get-deps
+	$(REBAR) compile
 
 compile:
 	@$(REBAR) compile
@@ -80,7 +84,7 @@ shell: compile
 # rebuilt). However, eunit runs the tests, which probably
 # fails (thats probably why You want them in the shell). This
 # runs eunit but tells make to ignore the result.
-	- @$(REBAR) eunit
+	- @$(REBAR) skip_deps=true eunit
 	@$(ERL) $(ERLFLAGS)
 
 distclean: clean
